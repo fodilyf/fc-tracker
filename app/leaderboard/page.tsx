@@ -26,7 +26,6 @@ export default function Leaderboard() {
 
   useEffect(() => {
     load();
-    // Realtime: re-fetch on any match insert/update/delete
     const ch = supabase.channel("matches-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () => load())
       .subscribe();
@@ -38,22 +37,53 @@ export default function Leaderboard() {
 
   return (
     <div>
-      <header className="mb-8">
-        <h1 className="text-4xl font-black mb-1">CLASSEMENT</h1>
-        <p className="text-gray-400">Mis à jour en temps réel ⚡</p>
+      <header className="mb-6">
+        <h1 className="text-3xl sm:text-4xl font-black mb-1">CLASSEMENT</h1>
+        <p className="text-gray-400 text-sm">Mis à jour en temps réel ⚡</p>
       </header>
 
       {loading && <p className="text-gray-400">Chargement...</p>}
 
       {!loading && rows.length === 0 && (
         <div className="card text-center py-12">
-          <p className="text-gray-400">Aucun match enregistré.</p>
-          <a href="/add-match" className="btn-neon mt-4">Ajouter le premier match</a>
+          <p className="text-gray-400">Aucun match validé pour le moment.</p>
+          <a href="/add-match" className="btn-neon mt-4 inline-flex">+ Ajouter un match</a>
         </div>
       )}
 
+      {/* === Mobile : cards === */}
       {rows.length > 0 && (
-        <div className="card overflow-x-auto">
+        <div className="md:hidden space-y-2">
+          {rows.map((r, i) => (
+            <div key={r.id} className={`card !p-3 ${i === 0 ? "border-neon/40 bg-neon/5" : ""}`}>
+              <div className="flex items-center gap-3">
+                <div className="text-2xl font-black w-10 text-center">{medal(i)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-black text-base truncate">{r.username}</div>
+                  <div className="text-[11px] text-gray-400 flex items-center gap-2 flex-wrap">
+                    <span><span className="text-neon font-bold">{r.wins}</span>V</span>
+                    <span>{r.draws}N</span>
+                    <span className="text-red-400">{r.losses}D</span>
+                    <span className="text-gray-500">•</span>
+                    <span>{r.goals_for}-{r.goals_against}</span>
+                    <span className={`font-bold ${r.goal_diff > 0 ? "text-neon" : r.goal_diff < 0 ? "text-red-400" : ""}`}>
+                      ({r.goal_diff > 0 ? "+" : ""}{r.goal_diff})
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-black text-neon glow-text leading-none">{r.points}</div>
+                  <div className="text-[10px] uppercase text-gray-500 tracking-wider">pts</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* === Desktop : table === */}
+      {rows.length > 0 && (
+        <div className="hidden md:block card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-gray-400 uppercase text-xs tracking-wider border-b border-border">

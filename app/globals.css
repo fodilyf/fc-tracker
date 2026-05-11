@@ -11,6 +11,8 @@ html, body {
   background-attachment: fixed;
   color: #e6edf7;
   min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Subtle field-grid background */
@@ -22,50 +24,58 @@ body::before {
   background-image:
     linear-gradient(rgba(0, 255, 135, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 255, 135, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-size: 50px 50px;
   z-index: 0;
 }
 
-/* Main wrapper above the grid */
 main, nav, header, footer { position: relative; z-index: 1; }
 
 /* Buttons */
 .btn-neon {
-  @apply inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-bold uppercase tracking-wider text-sm transition-all;
+  @apply inline-flex items-center justify-center px-5 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all;
   background: linear-gradient(135deg, #00ff87 0%, #00cc6a 100%);
   color: #0a0e1a;
   box-shadow: 0 0 20px rgba(0, 255, 135, 0.4);
+  min-height: 44px; /* iOS tap target */
 }
-.btn-neon:hover {
-  box-shadow: 0 0 30px rgba(0, 255, 135, 0.7);
-  transform: translateY(-1px);
-}
+.btn-neon:hover { box-shadow: 0 0 30px rgba(0, 255, 135, 0.7); transform: translateY(-1px); }
+.btn-neon:active { transform: translateY(0); }
 .btn-neon:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .btn-ghost {
-  @apply inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-bold uppercase tracking-wider text-sm transition-all border border-border text-white;
+  @apply inline-flex items-center justify-center px-5 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all border border-border text-white;
+  min-height: 44px;
 }
 .btn-ghost:hover { border-color: #00ff87; color: #00ff87; }
 
 .card {
-  @apply bg-card border border-border rounded-xl p-5;
+  @apply bg-card border border-border rounded-xl p-4 sm:p-5;
   backdrop-filter: blur(8px);
 }
 
 .input {
-  @apply w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-neon transition;
+  @apply w-full bg-bg border border-border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-neon transition;
+  font-size: 16px; /* éviter le zoom iOS */
 }
 
 .label {
   @apply block text-xs uppercase tracking-wider text-gray-400 mb-1.5 font-bold;
 }
 
-.glow-text {
-  text-shadow: 0 0 20px rgba(0, 255, 135, 0.5);
-}
+.glow-text { text-shadow: 0 0 20px rgba(0, 255, 135, 0.5); }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #0a0e1a; }
 ::-webkit-scrollbar-thumb { background: #1e2a47; border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: #00cc6a; }
+
+/* Désactive le sélection sur les éléments UI */
+button, a { -webkit-user-select: none; user-select: none; }
+
+/* Animation neon pulse pour le badge */
+@keyframes pulseNeon {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 128, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.7); }
+}
+.animate-pulse-neon { animation: pulseNeon 2s ease-in-out infinite; }

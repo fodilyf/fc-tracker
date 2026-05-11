@@ -21,34 +21,31 @@ export default function Nav() {
   const [mounted, setMounted] = useState(false);
 
   const loadPending = async (userId: string) => {
-    // 1) Matchs PENDING où je suis joueur ET pas encore validé
     const { data: pending } = await supabase
       .from("matches")
       .select("player1_id, player2_id, validated_by_p1, validated_by_p2")
       .eq("status", "pending")
       .or(`player1_id.eq.${userId},player2_id.eq.${userId}`);
-    const toValidate = (pending ?? []).filter((m: any) => {
+    const tv = (pending ?? []).filter((m: any) => {
       const isP1 = m.player1_id === userId;
       return isP1 ? !m.validated_by_p1 : !m.validated_by_p2;
     }).length;
 
-    // 2) Mes matchs REJECTED (créés par moi)
     const { count: myRejected } = await supabase
       .from("matches")
       .select("*", { count: "exact", head: true })
       .eq("status", "rejected")
       .eq("created_by", userId);
 
-    // 3) Litiges DISPUTED où je ne suis NI player1 NI player2
     const { data: disputed } = await supabase
       .from("matches")
       .select("player1_id, player2_id")
       .eq("status", "disputed");
-    const toArbitrate = (disputed ?? []).filter((m: any) =>
+    const ta = (disputed ?? []).filter((m: any) =>
       m.player1_id !== userId && m.player2_id !== userId
     ).length;
 
-    setPendingCount(toValidate + (myRejected ?? 0) + toArbitrate);
+    setPendingCount(tv + (myRejected ?? 0) + ta);
   };
 
   useEffect(() => {
@@ -65,7 +62,6 @@ export default function Nav() {
     return () => sub.subscription.unsubscribe();
   }, [supabase]);
 
-  // Realtime : recompter quand des matchs changent
   useEffect(() => {
     if (!user) return;
     const ch = supabase.channel("nav-pending")
@@ -83,12 +79,13 @@ export default function Nav() {
 
   return (
     <nav className="border-b border-border bg-card/70 backdrop-blur sticky top-0 z-30">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 font-black text-xl glow-text text-neon">
-          <span className="text-2xl">⚽</span>
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+        <Link href="/" className="flex items-center gap-2 font-black text-lg sm:text-xl glow-text text-neon">
+          <span className="text-xl sm:text-2xl">⚽</span>
           <span>FC<span className="text-white">TRACKER</span></span>
         </Link>
 
+        {/* Desktop nav links */}
         {mounted && user && (
           <div className="hidden md:flex items-center gap-1">
             {links.map((l) => (
@@ -110,7 +107,7 @@ export default function Nav() {
             >
               🔔
               {pendingCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-accent animate-pulse-neon">
+                <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-accent">
                   {pendingCount}
                 </span>
               )}
@@ -118,47 +115,19 @@ export default function Nav() {
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        {/* Bouton compte (visible partout) */}
+        <div className="flex items-center gap-2">
           {mounted && user ? (
-            <button onClick={signOut} className="btn-ghost !py-1.5 !px-3 text-xs">
+            <button onClick={signOut} className="btn-ghost !py-1.5 !px-3 text-[10px] sm:text-xs">
               Déconnexion
             </button>
           ) : mounted ? (
-            <Link href="/login" className="btn-neon !py-1.5 !px-3 text-xs">
+            <Link href="/login" className="btn-neon !py-1.5 !px-3 text-[10px] sm:text-xs">
               Connexion
             </Link>
           ) : null}
         </div>
       </div>
-
-      {mounted && user && (
-        <div className="md:hidden border-t border-border flex overflow-x-auto px-2">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`px-3 py-2 text-xs font-bold uppercase whitespace-nowrap ${
-                pathname === l.href ? "text-neon" : "text-gray-400"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
-          <Link
-            href="/notifications"
-            className={`relative px-3 py-2 text-xs font-bold uppercase whitespace-nowrap ${
-              pathname === "/notifications" ? "text-neon" : "text-gray-400"
-            }`}
-          >
-            🔔
-            {pendingCount > 0 && (
-              <span className="absolute top-1 right-1 bg-accent text-white text-[9px] font-black rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1">
-                {pendingCount}
-              </span>
-            )}
-          </Link>
-        </div>
-      )}
     </nav>
   );
 }
