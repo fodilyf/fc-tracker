@@ -10,14 +10,14 @@ type Match = {
   played_at: string;
   notes: string | null;
   created_by: string | null;
-  status: "pending" | "validated" | "rejected";
+  status: "pending" | "validated" | "rejected" | "disputed" | "rejected_final";
   validated_by_p1: boolean;
   validated_by_p2: boolean;
   p1: { username: string } | null;
   p2: { username: string } | null;
 };
 
-type Filter = "all" | "validated" | "pending";
+type Filter = "all" | "validated" | "pending" | "disputed";
 
 export default function History() {
   const supabase = createClient();
@@ -65,10 +65,12 @@ export default function History() {
   const filtered = items.filter((m) => {
     if (filter === "validated") return m.status === "validated";
     if (filter === "pending")   return m.status === "pending";
+    if (filter === "disputed")  return m.status === "disputed" || m.status === "rejected" || m.status === "rejected_final";
     return true;
   });
 
-  const pendingCount = items.filter(m => m.status === "pending").length;
+  const pendingCount  = items.filter(m => m.status === "pending").length;
+  const disputedCount = items.filter(m => m.status === "disputed" || m.status === "rejected" || m.status === "rejected_final").length;
 
   return (
     <div>
@@ -87,6 +89,9 @@ export default function History() {
         <FilterBtn active={filter === "pending"}    onClick={() => setFilter("pending")}>
           En attente {pendingCount > 0 && <span className="ml-1 bg-accent text-white text-[10px] rounded-full px-1.5 py-0.5">{pendingCount}</span>}
         </FilterBtn>
+        <FilterBtn active={filter === "disputed"}   onClick={() => setFilter("disputed")}>
+          Litiges {disputedCount > 0 && <span className="ml-1 bg-accent text-white text-[10px] rounded-full px-1.5 py-0.5">{disputedCount}</span>}
+        </FilterBtn>
       </div>
 
       {loading && <p className="text-gray-400">Chargement...</p>}
@@ -95,32 +100,55 @@ export default function History() {
         {filtered.map((m) => {
           const win1 = m.player1_score > m.player2_score;
           const win2 = m.player2_score > m.player1_score;
-          const isPending = m.status === "pending";
+          const isInactive = m.status === "pending";
+          const isRejected = m.status === "rejected";
+          const isDisputed = m.status === "disputed";
+          const isRejectedFinal = m.status === "rejected_final";
+          const isInactive = isInactive || isRejected || isDisputed || isRejectedFinal;
+          const borderClass =
+            isDisputed ? "border-yellow-500/40 bg-yellow-500/5" :
+            isRejected || isRejectedFinal ? "border-red-500/40 bg-red-500/5" :
+            isInactive ? "border-yellow-500/40 bg-yellow-500/5" : "";
 
           return (
-            <div key={m.id} className={`card flex items-center gap-4 ${isPending ? "border-yellow-500/40 bg-yellow-500/5" : ""}`}>
+            <div key={m.id} className={`card flex items-center gap-4 ${borderClass}`}>
               <div className="text-xs text-gray-500 w-24 hidden md:block">{fmt(m.played_at)}</div>
 
               <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-                <div className={`text-right ${win1 && !isPending ? "text-neon" : "text-gray-300"}`}>
+                <div className={`text-right ${win1 && !isInactive ? "text-neon" : "text-gray-300"}`}>
                   <div className="font-bold">{m.p1?.username ?? "?"}</div>
                   {m.team1 && <div className="text-xs text-gray-500">{m.team1}</div>}
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
                   <div className="flex items-center gap-3 text-3xl font-black">
-                    <span className={win1 && !isPending ? "text-neon glow-text" : isPending ? "text-gray-400" : ""}>{m.player1_score}</span>
+                    <span className={win1 && !isInactive ? "text-neon glow-text" : isInactive ? "text-gray-400" : ""}>{m.player1_score}</span>
                     <span className="text-gray-600">—</span>
-                    <span className={win2 && !isPending ? "text-neon glow-text" : isPending ? "text-gray-400" : ""}>{m.player2_score}</span>
+                    <span className={win2 && !isInactive ? "text-neon glow-text" : isInactive ? "text-gray-400" : ""}>{m.player2_score}</span>
                   </div>
                   {isPending && (
                     <span className="text-[10px] uppercase tracking-widest font-black bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">
                       ⏳ En attente
                     </span>
                   )}
+                  {isDisputed && (
+                    <span className="text-[10px] uppercase tracking-widest font-black bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">
+                      ⚖️ Litige
+                    </span>
+                  )}
+                  {isRejected && (
+                    <span className="text-[10px] uppercase tracking-widest font-black bg-red-500/20 text-red-300 px-2 py-0.5 rounded">
+                      ❌ Refusé
+                    </span>
+                  )}
+                  {isRejectedFinal && (
+                    <span className="text-[10px] uppercase tracking-widest font-black bg-red-500/20 text-red-300 px-2 py-0.5 rounded">
+                      ❌ Rejeté définitivement
+                    </span>
+                  )}
                 </div>
 
-                <div className={`text-left ${win2 && !isPending ? "text-neon" : "text-gray-300"}`}>
+                <div className={`text-left ${win2 && !isInactive ? "text-neon" : "text-gray-300"}`}>
                   <div className="font-bold">{m.p2?.username ?? "?"}</div>
                   {m.team2 && <div className="text-xs text-gray-500">{m.team2}</div>}
                 </div>

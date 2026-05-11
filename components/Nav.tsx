@@ -21,12 +21,34 @@ export default function Nav() {
   const [mounted, setMounted] = useState(false);
 
   const loadPending = async (userId: string) => {
-    const { count } = await supabase
+    // 1) Matchs PENDING où je suis joueur ET pas encore validé
+    const { data: pending } = await supabase
       .from("matches")
-      .select("*", { count: "exact", head: true })
+      .select("player1_id, player2_id, validated_by_p1, validated_by_p2")
       .eq("status", "pending")
       .or(`player1_id.eq.${userId},player2_id.eq.${userId}`);
-    setPendingCount(count ?? 0);
+    const toValidate = (pending ?? []).filter((m: any) => {
+      const isP1 = m.player1_id === userId;
+      return isP1 ? !m.validated_by_p1 : !m.validated_by_p2;
+    }).length;
+
+    // 2) Mes matchs REJECTED (créés par moi)
+    const { count: myRejected } = await supabase
+      .from("matches")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "rejected")
+      .eq("created_by", userId);
+
+    // 3) Litiges DISPUTED où je ne suis NI player1 NI player2
+    const { data: disputed } = await supabase
+      .from("matches")
+      .select("player1_id, player2_id")
+      .eq("status", "disputed");
+    const toArbitrate = (disputed ?? []).filter((m: any) =>
+      m.player1_id !== userId && m.player2_id !== userId
+    ).length;
+
+    setPendingCount(toValidate + (myRejected ?? 0) + toArbitrate);
   };
 
   useEffect(() => {
