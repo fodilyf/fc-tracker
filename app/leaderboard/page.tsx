@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
+import { getDisplayAvatar } from "@/lib/avatar";
+import { type Title } from "@/lib/titles";
 
 type Row = {
   id: string; username: string;
@@ -9,18 +12,34 @@ type Row = {
   points: number; win_rate: number;
 };
 
+type Extra = { emoji: string | null; favorite_color: string | null; worst_title: Title };
+
 export default function Leaderboard() {
   const supabase = createClient();
   const [rows, setRows] = useState<Row[]>([]);
+  const [extras, setExtras] = useState<Record<string, Extra>>({});
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from("v_leaderboard")
-      .select("*")
+    const { data: lb } = await supabase
+      .from("v_leaderboard").select("*")
       .order("points", { ascending: false })
       .order("goal_diff", { ascending: false });
-    if (!error && data) setRows(data as Row[]);
+    setRows((lb ?? []) as Row[]);
+
+    // Récup emoji + couleur + worst_title pour chaque joueur
+    const { data: profs } = await supabase
+      .from("profiles").select("id, emoji, favorite_color");
+    const { data: titles } = await supabase
+      .from("v_player_worst_title").select("player_id, worst_title");
+    const ex: Record<string, Extra> = {};
+    (profs ?? []).forEach((p: any) => {
+      ex[p.id] = { emoji: p.emoji, favorite_color: p.favorite_color, worst_title: null };
+    });
+    (titles ?? []).forEach((t: any) => {
+      if (ex[t.player_id]) ex[t.player_id].worst_title = t.worst_title;
+    });
+    setExtras(ex);
     setLoading(false);
   };
 
@@ -28,6 +47,7 @@ export default function Leaderboard() {
     load();
     const ch = supabase.channel("matches-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
@@ -54,10 +74,18 @@ export default function Leaderboard() {
       {/* === Mobile : cards === */}
       {rows.length > 0 && (
         <div className="md:hidden space-y-2">
-          {rows.map((r, i) => (
-            <div key={r.id} className={`card !p-3 ${i === 0 ? "border-neon/40 bg-neon/5" : ""}`}>
-              <div className="flex items-center gap-3">
-                <div className="text-2xl font-black w-10 text-center">{medal(i)}</div>
+          {rows.map((r, i) => {
+            const e = extras[r.id];
+            const avatar = getDisplayAvatar(e?.emoji, e?.worst_title ?? null);
+            const color = e?.favorite_color || "#00ff87";
+            return (
+              <Link key={r.id} href={`/player/${encodeURIComponent(r.username)}`}
+                className={`card !p-3 flex items-center gap-3 transition active:scale-[0.98] ${i === 0 ? "border-neon/40 bg-neon/5" : ""}`}>
+                <div className="text-base font-black w-6 text-center text-gray-400">{medal(i)}</div>
+                <div className="text-3xl w-12 h-12 rounded-full border-2 flex items-center justify-center shrink-0"
+                  style={{ borderColor: color, boxShadow: `0 0 12px ${color}30` }}>
+                  {avatar}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-black text-base truncate">{r.username}</div>
                   <div className="text-[11px] text-gray-400 flex items-center gap-2 flex-wrap">
@@ -65,9 +93,8 @@ export default function Leaderboard() {
                     <span>{r.draws}N</span>
                     <span className="text-red-400">{r.losses}D</span>
                     <span className="text-gray-500">•</span>
-                    <span>{r.goals_for}-{r.goals_against}</span>
                     <span className={`font-bold ${r.goal_diff > 0 ? "text-neon" : r.goal_diff < 0 ? "text-red-400" : ""}`}>
-                      ({r.goal_diff > 0 ? "+" : ""}{r.goal_diff})
+                      {r.goal_diff > 0 ? "+" : ""}{r.goal_diff}
                     </span>
                   </div>
                 </div>
@@ -75,9 +102,9 @@ export default function Leaderboard() {
                   <div className="text-2xl font-black text-neon glow-text leading-none">{r.points}</div>
                   <div className="text-[10px] uppercase text-gray-500 tracking-wider">pts</div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
 
@@ -101,23 +128,32 @@ export default function Leaderboard() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.id} className={`border-b border-border/50 ${i === 0 ? "bg-neon/5" : ""}`}>
-                  <td className="py-3 pr-2 font-bold">{medal(i)}</td>
-                  <td className="py-3 pr-2 font-bold">{r.username}</td>
-                  <td className="py-3 px-2 text-right text-gray-300">{r.played}</td>
-                  <td className="py-3 px-2 text-right text-neon font-bold">{r.wins}</td>
-                  <td className="py-3 px-2 text-right text-gray-300">{r.draws}</td>
-                  <td className="py-3 px-2 text-right text-red-400">{r.losses}</td>
-                  <td className="py-3 px-2 text-right text-gray-300">{r.goals_for}</td>
-                  <td className="py-3 px-2 text-right text-gray-300">{r.goals_against}</td>
-                  <td className={`py-3 px-2 text-right font-bold ${r.goal_diff > 0 ? "text-neon" : r.goal_diff < 0 ? "text-red-400" : "text-gray-300"}`}>
-                    {r.goal_diff > 0 ? "+" : ""}{r.goal_diff}
-                  </td>
-                  <td className="py-3 px-2 text-right text-gray-300">{r.win_rate}%</td>
-                  <td className="py-3 pl-2 text-right text-neon font-black text-base">{r.points}</td>
-                </tr>
-              ))}
+              {rows.map((r, i) => {
+                const e = extras[r.id];
+                const avatar = getDisplayAvatar(e?.emoji, e?.worst_title ?? null);
+                return (
+                  <tr key={r.id} className={`border-b border-border/50 hover:bg-bg/40 ${i === 0 ? "bg-neon/5" : ""}`}>
+                    <td className="py-3 pr-2 font-bold">{medal(i)}</td>
+                    <td className="py-3 pr-2 font-bold">
+                      <Link href={`/player/${encodeURIComponent(r.username)}`} className="hover:text-neon flex items-center gap-2">
+                        <span className="text-xl">{avatar}</span>
+                        <span>{r.username}</span>
+                      </Link>
+                    </td>
+                    <td className="py-3 px-2 text-right text-gray-300">{r.played}</td>
+                    <td className="py-3 px-2 text-right text-neon font-bold">{r.wins}</td>
+                    <td className="py-3 px-2 text-right text-gray-300">{r.draws}</td>
+                    <td className="py-3 px-2 text-right text-red-400">{r.losses}</td>
+                    <td className="py-3 px-2 text-right text-gray-300">{r.goals_for}</td>
+                    <td className="py-3 px-2 text-right text-gray-300">{r.goals_against}</td>
+                    <td className={`py-3 px-2 text-right font-bold ${r.goal_diff > 0 ? "text-neon" : r.goal_diff < 0 ? "text-red-400" : "text-gray-300"}`}>
+                      {r.goal_diff > 0 ? "+" : ""}{r.goal_diff}
+                    </td>
+                    <td className="py-3 px-2 text-right text-gray-300">{r.win_rate}%</td>
+                    <td className="py-3 pl-2 text-right text-neon font-black text-base">{r.points}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

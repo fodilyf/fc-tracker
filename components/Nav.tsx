@@ -116,11 +116,16 @@ export default function Nav() {
         )}
 
         {/* Bouton compte (visible partout) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {mounted && user ? (
-            <button onClick={signOut} className="btn-ghost !py-1.5 !px-3 text-[10px] sm:text-xs">
-              Déconnexion
-            </button>
+            <>
+              <Link href="/settings" className="text-gray-400 hover:text-neon text-xl px-2" title="Profil">
+                ⚙️
+              </Link>
+              <button onClick={signOut} className="btn-ghost !py-1.5 !px-3 text-[10px] sm:text-xs">
+                Déconnexion
+              </button>
+            </>
           ) : mounted ? (
             <Link href="/login" className="btn-neon !py-1.5 !px-3 text-[10px] sm:text-xs">
               Connexion

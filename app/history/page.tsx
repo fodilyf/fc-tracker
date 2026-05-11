@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 
 type Match = {
@@ -154,15 +155,22 @@ export default function History() {
                 </div>
               </div>
 
-              {me && m.created_by === me.id && (
-                <button
-                  onClick={() => remove(m.id)}
-                  className="text-red-400 hover:text-red-300 text-xs uppercase font-bold"
-                  title="Supprimer"
-                >
-                  ✕
-                </button>
-              )}
+              <div className="flex flex-col gap-2 items-center">
+                {m.status === "validated" && (
+                  <Link
+                    href={`/share/${m.id}`}
+                    className="text-neon hover:text-white text-xs uppercase font-bold"
+                    title="Partager"
+                  >📤</Link>
+                )}
+                {me && m.created_by === me.id && (
+                  <button
+                    onClick={() => remove(m.id)}
+                    className="text-red-400 hover:text-red-300 text-xs uppercase font-bold"
+                    title="Supprimer"
+                  >✕</button>
+                )}
+              </div>
             </div>
           );
         })}
