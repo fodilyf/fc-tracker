@@ -100,11 +100,11 @@ export default function History() {
         {filtered.map((m) => {
           const win1 = m.player1_score > m.player2_score;
           const win2 = m.player2_score > m.player1_score;
-          const isInactive = m.status === "pending";
+          const isPending = m.status === "pending";
           const isRejected = m.status === "rejected";
           const isDisputed = m.status === "disputed";
           const isRejectedFinal = m.status === "rejected_final";
-          const isInactive = isInactive || isRejected || isDisputed || isRejectedFinal;
+          const isInactive = isPending || isRejected || isDisputed || isRejectedFinal;
           const borderClass =
             isDisputed ? "border-yellow-500/40 bg-yellow-500/5" :
             isRejected || isRejectedFinal ? "border-red-500/40 bg-red-500/5" :
