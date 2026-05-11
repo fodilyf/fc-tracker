@@ -10,15 +10,21 @@ type Match = {
   played_at: string;
   notes: string | null;
   created_by: string | null;
+  status: "pending" | "validated" | "rejected";
+  validated_by_p1: boolean;
+  validated_by_p2: boolean;
   p1: { username: string } | null;
   p2: { username: string } | null;
 };
+
+type Filter = "all" | "validated" | "pending";
 
 export default function History() {
   const supabase = createClient();
   const [me, setMe] = useState<any>(null);
   const [items, setItems] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<Filter>("all");
 
   const load = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -27,7 +33,8 @@ export default function History() {
       .from("matches")
       .select(`
         id, player1_id, player2_id, player1_score, player2_score,
-        team1, team2, played_at, notes, created_by,
+        team1, team2, played_at, notes, created_by, status,
+        validated_by_p1, validated_by_p2,
         p1:profiles!matches_player1_id_fkey(username),
         p2:profiles!matches_player2_id_fkey(username)
       `)
@@ -55,9 +62,17 @@ export default function History() {
     day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
   });
 
+  const filtered = items.filter((m) => {
+    if (filter === "validated") return m.status === "validated";
+    if (filter === "pending")   return m.status === "pending";
+    return true;
+  });
+
+  const pendingCount = items.filter(m => m.status === "pending").length;
+
   return (
     <div>
-      <header className="mb-8 flex items-end justify-between">
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-4xl font-black mb-1">HISTORIQUE</h1>
           <p className="text-gray-400">Les 100 derniers matchs</p>
@@ -65,29 +80,47 @@ export default function History() {
         <a href="/add-match" className="btn-neon">+ Match</a>
       </header>
 
+      {/* Filtres */}
+      <div className="flex gap-2 mb-6">
+        <FilterBtn active={filter === "all"}        onClick={() => setFilter("all")}>Tous</FilterBtn>
+        <FilterBtn active={filter === "validated"}  onClick={() => setFilter("validated")}>Validés</FilterBtn>
+        <FilterBtn active={filter === "pending"}    onClick={() => setFilter("pending")}>
+          En attente {pendingCount > 0 && <span className="ml-1 bg-accent text-white text-[10px] rounded-full px-1.5 py-0.5">{pendingCount}</span>}
+        </FilterBtn>
+      </div>
+
       {loading && <p className="text-gray-400">Chargement...</p>}
 
       <div className="space-y-3">
-        {items.map((m) => {
+        {filtered.map((m) => {
           const win1 = m.player1_score > m.player2_score;
           const win2 = m.player2_score > m.player1_score;
+          const isPending = m.status === "pending";
+
           return (
-            <div key={m.id} className="card flex items-center gap-4">
+            <div key={m.id} className={`card flex items-center gap-4 ${isPending ? "border-yellow-500/40 bg-yellow-500/5" : ""}`}>
               <div className="text-xs text-gray-500 w-24 hidden md:block">{fmt(m.played_at)}</div>
 
               <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-                <div className={`text-right ${win1 ? "text-neon" : "text-gray-300"}`}>
+                <div className={`text-right ${win1 && !isPending ? "text-neon" : "text-gray-300"}`}>
                   <div className="font-bold">{m.p1?.username ?? "?"}</div>
                   {m.team1 && <div className="text-xs text-gray-500">{m.team1}</div>}
                 </div>
 
-                <div className="flex items-center gap-3 text-3xl font-black">
-                  <span className={win1 ? "text-neon glow-text" : ""}>{m.player1_score}</span>
-                  <span className="text-gray-600">—</span>
-                  <span className={win2 ? "text-neon glow-text" : ""}>{m.player2_score}</span>
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex items-center gap-3 text-3xl font-black">
+                    <span className={win1 && !isPending ? "text-neon glow-text" : isPending ? "text-gray-400" : ""}>{m.player1_score}</span>
+                    <span className="text-gray-600">—</span>
+                    <span className={win2 && !isPending ? "text-neon glow-text" : isPending ? "text-gray-400" : ""}>{m.player2_score}</span>
+                  </div>
+                  {isPending && (
+                    <span className="text-[10px] uppercase tracking-widest font-black bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">
+                      ⏳ En attente
+                    </span>
+                  )}
                 </div>
 
-                <div className={`text-left ${win2 ? "text-neon" : "text-gray-300"}`}>
+                <div className={`text-left ${win2 && !isPending ? "text-neon" : "text-gray-300"}`}>
                   <div className="font-bold">{m.p2?.username ?? "?"}</div>
                   {m.team2 && <div className="text-xs text-gray-500">{m.team2}</div>}
                 </div>
@@ -107,11 +140,28 @@ export default function History() {
         })}
       </div>
 
-      {!loading && items.length === 0 && (
+      {!loading && filtered.length === 0 && (
         <div className="card text-center py-12">
-          <p className="text-gray-400">Pas encore de matchs.</p>
+          <p className="text-gray-400">
+            {filter === "pending" ? "Aucun match en attente." :
+             filter === "validated" ? "Aucun match validé." :
+             "Pas encore de matchs."}
+          </p>
         </div>
       )}
     </div>
+  );
+}
+
+function FilterBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
+        active ? "bg-neon text-bg" : "border border-border text-gray-400 hover:text-white hover:border-neon"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

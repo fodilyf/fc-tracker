@@ -17,16 +17,41 @@ export default function Nav() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<any>(null);
+  const [pendingCount, setPendingCount] = useState(0);
   const [mounted, setMounted] = useState(false);
+
+  const loadPending = async (userId: string) => {
+    const { count } = await supabase
+      .from("matches")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending")
+      .or(`player1_id.eq.${userId},player2_id.eq.${userId}`);
+    setPendingCount(count ?? 0);
+  };
 
   useEffect(() => {
     setMounted(true);
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      if (data.user) loadPending(data.user.id);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) loadPending(session.user.id);
+      else setPendingCount(0);
     });
     return () => sub.subscription.unsubscribe();
   }, [supabase]);
+
+  // Realtime : recompter quand des matchs changent
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase.channel("nav-pending")
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches" },
+        () => loadPending(user.id))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -49,14 +74,25 @@ export default function Nav() {
                 key={l.href}
                 href={l.href}
                 className={`px-3 py-2 rounded-md text-sm font-bold uppercase tracking-wider transition ${
-                  pathname === l.href
-                    ? "text-neon bg-neon/10"
-                    : "text-gray-400 hover:text-white"
+                  pathname === l.href ? "text-neon bg-neon/10" : "text-gray-400 hover:text-white"
                 }`}
               >
                 {l.label}
               </Link>
             ))}
+            <Link
+              href="/notifications"
+              className={`relative px-3 py-2 rounded-md text-sm font-bold uppercase tracking-wider transition ${
+                pathname === "/notifications" ? "text-neon bg-neon/10" : "text-gray-400 hover:text-white"
+              }`}
+            >
+              🔔
+              {pendingCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-accent animate-pulse-neon">
+                  {pendingCount}
+                </span>
+              )}
+            </Link>
           </div>
         )}
 
@@ -86,6 +122,19 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          <Link
+            href="/notifications"
+            className={`relative px-3 py-2 text-xs font-bold uppercase whitespace-nowrap ${
+              pathname === "/notifications" ? "text-neon" : "text-gray-400"
+            }`}
+          >
+            🔔
+            {pendingCount > 0 && (
+              <span className="absolute top-1 right-1 bg-accent text-white text-[9px] font-black rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1">
+                {pendingCount}
+              </span>
+            )}
+          </Link>
         </div>
       )}
     </nav>

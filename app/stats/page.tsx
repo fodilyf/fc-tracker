@@ -44,6 +44,7 @@ export default function StatsPage() {
       const { data: matches } = await supabase
         .from("matches")
         .select("*")
+        .eq("status", "validated")
         .or(`player1_id.eq.${pid},player2_id.eq.${pid}`)
         .order("played_at", { ascending: false });
       const profById: Record<string, string> = Object.fromEntries(profiles.map(p => [p.id, p.username]));
