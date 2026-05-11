@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 
 const links = [
@@ -15,16 +15,18 @@ const links = [
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -40,7 +42,7 @@ export default function Nav() {
           <span>FC<span className="text-white">TRACKER</span></span>
         </Link>
 
-        {user && (
+        {mounted && user && (
           <div className="hidden md:flex items-center gap-1">
             {links.map((l) => (
               <Link
@@ -59,19 +61,19 @@ export default function Nav() {
         )}
 
         <div className="flex items-center gap-3">
-          {user ? (
+          {mounted && user ? (
             <button onClick={signOut} className="btn-ghost !py-1.5 !px-3 text-xs">
               Déconnexion
             </button>
-          ) : (
+          ) : mounted ? (
             <Link href="/login" className="btn-neon !py-1.5 !px-3 text-xs">
               Connexion
             </Link>
-          )}
+          ) : null}
         </div>
       </div>
 
-      {user && (
+      {mounted && user && (
         <div className="md:hidden border-t border-border flex overflow-x-auto px-2">
           {links.map((l) => (
             <Link

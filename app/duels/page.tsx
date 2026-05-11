@@ -1,6 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { titleEmoji, titleColor, titleLabel, type Title } from "@/lib/titles";
