@@ -67,7 +67,7 @@ export default function Settings() {
   return (
     <div className="max-w-2xl mx-auto">
       <header className="mb-6">
-        <h1 className="text-3xl sm:text-4xl font-black mb-1">⚙️ MON PROFIL</h1>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-wider mb-1">⚙️ MON PROFIL</h1>
         <p className="text-gray-400 text-sm">Personnalise comment tu apparais aux autres</p>
       </header>
 

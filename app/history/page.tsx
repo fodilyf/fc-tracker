@@ -77,7 +77,7 @@ export default function History() {
     <div>
       <header className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-4xl font-black mb-1">HISTORIQUE</h1>
+          <h1 className="font-display text-4xl sm:text-5xl tracking-wider mb-1">HISTORIQUE</h1>
           <p className="text-gray-400">Les 100 derniers matchs</p>
         </div>
         <a href="/add-match" className="btn-neon">+ Match</a>

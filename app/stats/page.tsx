@@ -55,7 +55,7 @@ export default function StatsPage() {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-4xl font-black mb-1">STATISTIQUES</h1>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-wider mb-1">STATISTIQUES</h1>
         <p className="text-gray-400">Toutes les stats par joueur</p>
       </header>
 

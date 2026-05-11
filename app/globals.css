@@ -1,9 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: dark;
+  --font-display: 'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 html, body {
@@ -11,8 +15,10 @@ html, body {
   background-attachment: fixed;
   color: #e6edf7;
   min-height: 100vh;
+  font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 /* Subtle field-grid background */
@@ -30,16 +36,27 @@ body::before {
 
 main, nav, header, footer { position: relative; z-index: 1; }
 
-/* Buttons */
+/* === Typography === */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+h1, h2, h3, .h-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+/* === Buttons === */
 .btn-neon {
   @apply inline-flex items-center justify-center px-5 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all;
   background: linear-gradient(135deg, #00ff87 0%, #00cc6a 100%);
   color: #0a0e1a;
   box-shadow: 0 0 20px rgba(0, 255, 135, 0.4);
-  min-height: 44px; /* iOS tap target */
+  min-height: 44px;
 }
-.btn-neon:hover { box-shadow: 0 0 30px rgba(0, 255, 135, 0.7); transform: translateY(-1px); }
-.btn-neon:active { transform: translateY(0); }
+.btn-neon:hover { box-shadow: 0 0 35px rgba(0, 255, 135, 0.75); transform: translateY(-1px); }
+.btn-neon:active { transform: scale(0.97); }
 .btn-neon:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .btn-ghost {
@@ -47,35 +64,84 @@ main, nav, header, footer { position: relative; z-index: 1; }
   min-height: 44px;
 }
 .btn-ghost:hover { border-color: #00ff87; color: #00ff87; }
+.btn-ghost:active { transform: scale(0.97); }
 
+/* === Card === */
 .card {
   @apply bg-card border border-border rounded-xl p-4 sm:p-5;
   backdrop-filter: blur(8px);
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 255, 135, 0.15);
+  border-color: rgba(0, 255, 135, 0.3);
 }
 
+/* === Inputs === */
 .input {
   @apply w-full bg-bg border border-border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-neon transition;
-  font-size: 16px; /* éviter le zoom iOS */
+  font-size: 16px;
+}
+.input:focus {
+  box-shadow: 0 0 0 3px rgba(0, 255, 135, 0.1);
 }
 
 .label {
   @apply block text-xs uppercase tracking-wider text-gray-400 mb-1.5 font-bold;
 }
 
-.glow-text { text-shadow: 0 0 20px rgba(0, 255, 135, 0.5); }
+/* === Effects === */
+.glow-text {
+  text-shadow: 0 0 20px rgba(0, 255, 135, 0.5);
+}
+.glow-text-strong {
+  text-shadow: 0 0 25px rgba(0, 255, 135, 0.7), 0 0 50px rgba(0, 255, 135, 0.3);
+}
 
-/* Scrollbar */
+/* === Scrollbar === */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #0a0e1a; }
 ::-webkit-scrollbar-thumb { background: #1e2a47; border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: #00cc6a; }
 
-/* Désactive le sélection sur les éléments UI */
+/* Désactive sélection sur UI */
 button, a { -webkit-user-select: none; user-select: none; }
 
-/* Animation neon pulse pour le badge */
+/* === Animations === */
 @keyframes pulseNeon {
   0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 128, 0.4); }
   50% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.7); }
 }
 .animate-pulse-neon { animation: pulseNeon 2s ease-in-out infinite; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeInUp 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px) rotate(-5deg); }
+  75% { transform: translateX(5px) rotate(5deg); }
+}
+.animate-shake { animation: shake 300ms ease-in-out; }
+
+@keyframes confettiFall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Stagger entrance helpers */
+.stagger-item { opacity: 0; animation: fadeInUp 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+.stagger-item:nth-child(7) { animation-delay: 300ms; }
+.stagger-item:nth-child(8) { animation-delay: 350ms; }
+.stagger-item:nth-child(9) { animation-delay: 400ms; }
+.stagger-item:nth-child(10) { animation-delay: 450ms; }

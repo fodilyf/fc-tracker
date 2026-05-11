@@ -67,8 +67,8 @@ export default function AddMatch() {
   return (
     <div className="max-w-2xl mx-auto">
       <header className="mb-8">
-        <h1 className="text-4xl font-black mb-1">+ AJOUTER UN MATCH</h1>
-        <p className="text-gray-400">Le match sera visible mais non comptabilisé tant qu'il n'est pas validé par les 2 joueurs</p>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-wider mb-1">+ AJOUTER UN MATCH</h1>
+        <p className="text-gray-400 text-sm">Le match sera visible mais non comptabilisé tant qu'il n'est pas validé par les 2 joueurs</p>
       </header>
 
       <form onSubmit={submit} className="card space-y-6">

@@ -1,0 +1,25 @@
+<svg width="240" height="48" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"></feGaussianBlur>
+      <feFlood flood-color="#00FF87" flood-opacity="0.6"></feFlood>
+      <feComposite in2="blur" operator="in" result="glow"></feComposite>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"></feComposite>
+    </filter>
+  </defs>
+
+  <g transform="translate(8, 8)">
+    <circle cx="16" cy="16" r="15" fill="#00FF87" filter="url(#neon-glow)"></circle>
+    <circle cx="16" cy="16" r="14" fill="#0A0E1A" stroke="#00FF87" stroke-width="1.5"></circle>
+
+    <path d="M16 6 L20 10 L18 16 L14 16 L12 10 Z" fill="#00FF87" opacity="0.9"></path>
+    <path d="M20 10 L26 12 L24 18 L18 16 Z" fill="#00FF87" opacity="0.7"></path>
+    <path d="M12 10 L6 12 L8 18 L14 16 Z" fill="#00FF87" opacity="0.7"></path>
+    <path d="M14 16 L18 16 L20 22 L16 26 L12 22 Z" fill="#00FF87" opacity="0.8"></path>
+    <path d="M8 18 L12 22 L16 26 L10 28 L6 24 Z" fill="#00FF87" opacity="0.6"></path>
+    <path d="M24 18 L20 22 L16 26 L22 28 L26 24 Z" fill="#00FF87" opacity="0.6"></path>
+  </g>
+
+  <text x="56" y="34" font-family="'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif" font-size="32" font-weight="900" fill="#FFFFFF" letter-spacing="2">FC</text>
+  <text x="92" y="34" font-family="'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif" font-size="32" font-weight="900" fill="#00FF87" filter="url(#neon-glow)" letter-spacing="2">TRACKER</text>
+</svg>

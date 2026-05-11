@@ -80,9 +80,12 @@ export default function Nav() {
   return (
     <nav className="border-b border-border bg-card/70 backdrop-blur sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
-        <Link href="/" className="flex items-center gap-2 font-black text-lg sm:text-xl glow-text text-neon">
-          <span className="text-xl sm:text-2xl">⚽</span>
-          <span>FC<span className="text-white">TRACKER</span></span>
+        <Link href="/" className="flex items-center gap-2 font-display text-2xl sm:text-3xl tracking-wider">
+          <span className="relative">
+            <span className="absolute inset-0 blur-md bg-neon/40 rounded-full"></span>
+            <span className="relative text-2xl sm:text-3xl">⚽</span>
+          </span>
+          <span className="text-white">FC<span className="text-neon glow-text-strong">TRACKER</span></span>
         </Link>
 
         {/* Desktop nav links */}

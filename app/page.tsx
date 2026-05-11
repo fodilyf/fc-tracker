@@ -14,56 +14,61 @@ export default function Home() {
   }, [supabase]);
 
   return (
-    <div className="text-center py-10 sm:py-16">
-      <div className="inline-block mb-4 px-3 py-1 rounded-full border border-neon/30 bg-neon/5 text-neon text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+    <div className="text-center pt-6 sm:pt-12 pb-10">
+      {/* Badge SCORE HUB */}
+      <div className="inline-block mb-5 px-3 py-1 rounded-full border border-neon/30 bg-neon/5 text-neon text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">
         ⚽ Score Hub
       </div>
 
-      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight mb-4">
-        FC<span className="text-neon glow-text">TRACKER</span>
+      {/* Hero title */}
+      <h1 className="font-display text-[64px] sm:text-[96px] md:text-[120px] leading-[0.85] tracking-wider mb-5">
+        <span className="text-white">FC</span>
+        <span className="text-neon glow-text-strong">TRACKER</span>
       </h1>
 
-      <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto mb-8 sm:mb-10 px-2">
+      {/* Tagline */}
+      <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto mb-10 px-2 leading-relaxed">
         {mounted && user
-          ? `Salut, prêt à enregistrer un nouveau match ? 🔥`
+          ? "Salut champion, prêt à enregistrer un nouveau match ? 🔥"
           : "Le tableau de bord ultime pour suivre vos matchs FC entre potes. Classement, historique, stats par duo, et le système de titres légendaire."}
       </p>
 
-      {/* CTA — change selon l'état de connexion */}
-      <div className="flex flex-wrap gap-3 justify-center px-4">
+      {/* CTA */}
+      <div className="flex flex-wrap gap-3 justify-center px-4 mb-16 sm:mb-24">
         {!mounted ? null : user ? (
           <>
-            <Link href="/add-match" className="btn-neon !text-base !px-6 !py-3">⚽ + Match</Link>
-            <Link href="/leaderboard" className="btn-ghost !text-base !px-6 !py-3">🏆 Classement</Link>
+            <Link href="/add-match" className="btn-neon !text-base !px-7 !py-3.5">⚽ + Match</Link>
+            <Link href="/leaderboard" className="btn-ghost !text-base !px-7 !py-3.5">🏆 Classement</Link>
           </>
         ) : (
           <>
-            <Link href="/login" className="btn-neon !text-base !px-6 !py-3">Commencer</Link>
-            <Link href="/leaderboard" className="btn-ghost !text-base !px-6 !py-3">Voir le classement</Link>
+            <Link href="/login" className="btn-neon !text-base !px-7 !py-3.5">Commencer</Link>
+            <Link href="/leaderboard" className="btn-ghost !text-base !px-7 !py-3.5">Voir le classement</Link>
           </>
         )}
       </div>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-20 text-left px-2">
-        <div className="card">
-          <div className="text-3xl mb-2">🏆</div>
-          <h3 className="text-neon font-black uppercase tracking-wider text-sm sm:text-base">Classement live</h3>
-          <p className="text-gray-400 text-sm mt-2">
+      {/* Features */}
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-left px-2">
+        <div className="card card-hover stagger-item">
+          <div className="text-4xl mb-3">🏆</div>
+          <h3 className="font-display text-neon text-xl tracking-widest mb-2">Classement live</h3>
+          <p className="text-gray-400 text-sm leading-relaxed">
             Points, ratio de victoires, différence de buts. Mis à jour en temps réel.
           </p>
         </div>
-        <div className="card">
-          <div className="text-3xl mb-2">⚔️</div>
-          <h3 className="text-neon font-black uppercase tracking-wider text-sm sm:text-base">Duels (head-to-head)</h3>
-          <p className="text-gray-400 text-sm mt-2">
+        <div className="card card-hover stagger-item">
+          <div className="text-4xl mb-3">⚔️</div>
+          <h3 className="font-display text-neon text-xl tracking-widest mb-2">Duels (head-to-head)</h3>
+          <p className="text-gray-400 text-sm leading-relaxed">
             Compare-toi à n'importe lequel de tes potes : qui domine vraiment ?
           </p>
         </div>
-        <div className="card sm:col-span-2 md:col-span-1">
-          <div className="text-3xl mb-2">🥩</div>
-          <h3 className="text-neon font-black uppercase tracking-wider text-sm sm:text-base">Système de titres</h3>
-          <p className="text-gray-400 text-sm mt-2">
-            3 défaites de suite ? Tu deviens le <span className="text-yellow-400">lkebda</span>. 5 ? <span className="text-pink-400">zawja</span>. 10 ? <span className="text-red-500">l9a7ba</span>.
+        <div className="card card-hover stagger-item sm:col-span-2 md:col-span-1">
+          <div className="text-4xl mb-3">🥩</div>
+          <h3 className="font-display text-neon text-xl tracking-widest mb-2">Système de titres</h3>
+          <p className="text-gray-400 text-sm leading-relaxed">
+            3 défaites de suite ? Tu deviens le <span className="text-yellow-400 font-bold">lkebda</span>. 5 ? <span className="text-pink-400 font-bold">zawja</span>. 10 ? <span className="text-purple font-bold">l9a7ba</span>.
           </p>
         </div>
       </div>

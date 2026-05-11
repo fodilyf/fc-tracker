@@ -55,7 +55,7 @@ export default function Duels() {
   return (
     <div className="space-y-10">
       <header>
-        <h1 className="text-4xl font-black mb-1">DUELS</h1>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-wider mb-1">DUELS</h1>
         <p className="text-gray-400">Confrontations directes (head-to-head)</p>
       </header>
 

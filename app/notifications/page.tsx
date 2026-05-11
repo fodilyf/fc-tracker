@@ -151,7 +151,7 @@ export default function Notifications() {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-4xl font-black mb-1">🔔 NOTIFICATIONS</h1>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-wider mb-1">🔔 NOTIFICATIONS</h1>
         <p className="text-gray-400">
           {total === 0 ? "Aucune action en attente" : `${total} action${total > 1 ? "s" : ""} en attente`}
         </p>
