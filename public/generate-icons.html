@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Générateur d'icônes FC Tracker</title>
+<style>
+  body { font-family: system-ui; background: #0a0e1a; color: #e6edf7; padding: 24px; max-width: 800px; margin: 0 auto; }
+  h1 { color: #00ff87; }
+  button { background: #00ff87; color: #0a0e1a; border: none; padding: 12px 24px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px; margin: 8px 4px; }
+  button:hover { box-shadow: 0 0 20px rgba(0, 255, 135, 0.5); }
+  .preview { display: flex; gap: 24px; margin: 24px 0; align-items: center; flex-wrap: wrap; }
+  .preview > div { text-align: center; }
+  canvas { border: 1px solid #1e2a47; border-radius: 12px; background: #0f1729; }
+  ol { line-height: 1.8; }
+  code { background: #1e2a47; padding: 2px 8px; border-radius: 4px; color: #00ff87; }
+</style>
+</head>
+<body>
+<h1>🎨 Générateur d'icônes FC Tracker</h1>
+<p>Clique sur les boutons pour télécharger les icônes PNG à mettre dans <code>public/</code></p>
+
+<div class="preview">
+  <div>
+    <canvas id="c192" width="192" height="192"></canvas>
+    <p>192×192</p>
+    <button onclick="download(192)">⬇️ Télécharger icon-192.png</button>
+  </div>
+  <div>
+    <canvas id="c512" width="512" height="512"></canvas>
+    <p>512×512</p>
+    <button onclick="download(512)">⬇️ Télécharger icon-512.png</button>
+  </div>
+</div>
+
+<h2>📋 Instructions</h2>
+<ol>
+  <li>Clique sur les 2 boutons "Télécharger"</li>
+  <li>Tu obtiens <code>icon-192.png</code> et <code>icon-512.png</code></li>
+  <li>Déplace ces 2 fichiers dans <code>C:\Users\fodil\Desktop\TAF\fc-tracker\public\</code></li>
+  <li>Rafraîchis la page après pour vérifier</li>
+</ol>
+
+<script>
+// Charge le SVG et le dessine sur les canvas
+async function loadAndDraw() {
+  const response = await fetch('/icon-source.svg');
+  const svgText = await response.text();
+  const svgBlob = new Blob([svgText], {type: 'image/svg+xml'});
+  const url = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  img.onload = () => {
+    [192, 512].forEach(size => {
+      const canvas = document.getElementById('c' + size);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+    });
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+function download(size) {
+  const canvas = document.getElementById('c' + size);
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `icon-${size}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+loadAndDraw();
+</script>
+</body>
+</html>

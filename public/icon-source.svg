@@ -1,0 +1,71 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feFlood flood-color="#00FF87" flood-opacity="0.8"/>
+      <feComposite in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <radialGradient id="bg-grad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0f1729"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </radialGradient>
+    <linearGradient id="ball-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00FF87"/>
+      <stop offset="100%" stop-color="#00CC6A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background carré arrondi (pour maskable) -->
+  <rect width="512" height="512" rx="100" fill="url(#bg-grad)"/>
+
+  <!-- Grille de fond subtile -->
+  <g opacity="0.08" stroke="#00FF87" stroke-width="1">
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+  </g>
+
+  <!-- Ballon central avec glow néon -->
+  <g transform="translate(256, 256)">
+    <!-- Halo extérieur -->
+    <circle r="170" fill="#00FF87" opacity="0.15"/>
+    <circle r="150" fill="#00FF87" opacity="0.25" filter="url(#neon-glow)"/>
+
+    <!-- Ballon principal -->
+    <circle r="140" fill="url(#ball-grad)" filter="url(#neon-glow)"/>
+    <circle r="135" fill="#0A0E1A" stroke="#00FF87" stroke-width="6"/>
+
+    <!-- Pentagones du ballon (style officiel FIFA) -->
+    <g fill="#00FF87">
+      <!-- Pentagone central haut -->
+      <polygon points="0,-60 38,-30 18,30 -18,30 -38,-30" opacity="0.95"/>
+      <!-- Pentagone droite haut -->
+      <polygon points="38,-30 90,-20 80,40 18,30" opacity="0.7"/>
+      <!-- Pentagone gauche haut -->
+      <polygon points="-38,-30 -90,-20 -80,40 -18,30" opacity="0.7"/>
+      <!-- Pentagone central bas -->
+      <polygon points="-18,30 18,30 28,80 0,100 -28,80" opacity="0.85"/>
+      <!-- Pentagone droite bas -->
+      <polygon points="18,30 80,40 70,90 28,80" opacity="0.6"/>
+      <!-- Pentagone gauche bas -->
+      <polygon points="-18,30 -80,40 -70,90 -28,80" opacity="0.6"/>
+    </g>
+  </g>
+
+  <!-- Texte "FC" en haut -->
+  <text x="256" y="100" text-anchor="middle"
+    font-family="'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif"
+    font-size="56" font-weight="900" fill="#FFFFFF"
+    letter-spacing="4">FC</text>
+
+  <!-- Texte "TRACKER" en bas -->
+  <text x="256" y="470" text-anchor="middle"
+    font-family="'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif"
+    font-size="56" font-weight="900" fill="#00FF87"
+    filter="url(#neon-glow)"
+    letter-spacing="6">TRACKER</text>
+</svg>
